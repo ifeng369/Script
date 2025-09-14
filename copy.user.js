@@ -6,6 +6,7 @@
 // @author       You
 // @match        *://blog.csdn.net/*
 // @match        *://*.zhihu.com/*
+// @match        *://*.jianshu.com/*
 // @grant        GM_setClipboard
 // ==/UserScript==
 
@@ -45,10 +46,37 @@
 
 
     setInterval(() => {
+        //知乎
+        document.querySelector(".ContentItem-expandButton")?.remove()
+        document.querySelector('.MobileModal-wrapper')?.remove()
+
         document.querySelector(".passport-login-container,.passport-login-tip-container,#toolBarBox")?.remove()
+        document.evaluate("//button[text()='打开App']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.closest('.Question-mainEntity > *').remove()
+        document.querySelector('.signFlowModal')?.closest('body > *')?.remove();
         document.querySelector('.signFlowModal')?.closest('body > *')?.remove();
         document.evaluate("//button[text()='立即登录/注册']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.closest('body > *')?.remove();
         // document.querySelector('button:contains(立即登录/注册)')?.closest('body > *')?.remove();
         document.querySelector('html').style=undefined;
+        // document.querySelector('.RichContent-inner').className="RichContent-inner1"
+        document.querySelector('.RichContent-inner').style["max-height"] = "100%"
+        document.querySelector('.RichContent-inner').style["padding-bottom"] = "100px"
+        // document.querySelector('.RichContent-inner').style={"max-height":"100%","height":"100%"}
+
+        
+        //简书
+        document.querySelector(".collapse-tips")?.remove()
+        document.querySelector(".OpenInAppButton")?.remove()
+        document.querySelector("#sub-frame-error")?.remove()
+        document.querySelector("#recommended-notes")?.remove()
+        document.querySelector("#footer")?.remove()
+        document.querySelector(".download-app-guidance")?.remove()
+        document.querySelector(".header-wrap")?.remove()
+        document.querySelector(".app-float-btn")?.remove()
+        document.querySelector(".app-float-btn")?.remove()
+        document.querySelector(".copyright")?.remove()
+        document.querySelector('body').style=undefined;
+        if(document.querySelector('.collapse-free-content'))
+            document.querySelector('.collapse-free-content').className = "collapse-free-content123"
+        // document.querySelector(".close-collapse-btn")?.click()
     }, 10)
 })();
