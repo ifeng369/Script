@@ -49,17 +49,21 @@
         //知乎
         document.querySelector(".ContentItem-expandButton")?.remove()
         document.querySelector('.MobileModal-wrapper')?.remove()
+        document.querySelector('.OpenInAppButton')?.remove()
 
         document.querySelector(".passport-login-container,.passport-login-tip-container,#toolBarBox")?.remove()
-        document.evaluate("//button[text()='打开App']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.closest('.Question-mainEntity > *').remove()
         document.querySelector('.signFlowModal')?.closest('body > *')?.remove();
         document.querySelector('.signFlowModal')?.closest('body > *')?.remove();
         document.evaluate("//button[text()='立即登录/注册']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.closest('body > *')?.remove();
         // document.querySelector('button:contains(立即登录/注册)')?.closest('body > *')?.remove();
         document.querySelector('html').style=undefined;
         // document.querySelector('.RichContent-inner').className="RichContent-inner1"
+        if(document.querySelector('.RichContent-inner'))
+        {
         document.querySelector('.RichContent-inner').style["max-height"] = "100%"
         document.querySelector('.RichContent-inner').style["padding-bottom"] = "100px"
+        }
+
         // document.querySelector('.RichContent-inner').style={"max-height":"100%","height":"100%"}
 
         
