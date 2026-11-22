@@ -1,6 +1,6 @@
 # 油猴、脚本猫 script
 
- [微软积分商城签到](https://gh.ifeng369.top/https://raw.githubusercontent.com/ifeng369/script/main/reward.user.js)
+ [Microsoft Rewards 全任务助手](https://gh.ifeng369.top/https://raw.githubusercontent.com/ifeng369/script/main/reward.user.js)
 
  [解除复制限制](https://gh.ifeng369.top/https://raw.githubusercontent.com/ifeng369/script/main/copy.user.js)
 
