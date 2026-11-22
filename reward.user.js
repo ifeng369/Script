@@ -2517,9 +2517,11 @@ FuckF.buildClaimHeaders = async (htmls) => {
     return headers;
 };
 
-// 同源兜底领取：定时运行在扩展 service_worker 中，Origin 为 chrome-extension://，
-// 风控账号的领取请求必被 500 拒绝（交卷通道已用 origin 覆盖规避，领取仍无效）。
-// 兜底在后台静默打开 dashboard，由内容脚本分支以站点同源 fetch 完成领取，结束后关闭该标签页。
+// 同源兜底领取：定时脚本运行在扩展 service_worker 中，Origin 为 chrome-extension://，
+// Next.js server action 会以 500 拒绝（交卷与领取的网页通道均如此，实测本账号全部 500）。
+// 关键：定时脚本（@crontab）不会作为页面脚本注入，脚本内的页面分支是死代码（已实测确认），
+// 因此同源领取必须由独立的页面脚本《Microsoft Rewards 全任务助手 - 同源领取页》完成，
+// 两者通过 @storageName 共享 GM 存储：本函数打开 dashboard 标签页并等待页面脚本回写结果。
 // 限流 3 小时：领取是每日动作，失败时不必每轮 cron 都开页
 FuckF.claimViaPage = async () => {
     const last = GM_getValue("Config.claimPageAt", 0);
@@ -2527,21 +2529,26 @@ FuckF.claimViaPage = async () => {
         FuckF.log("🟡", "积分领取：同源兜底 3 小时内已执行过，本轮跳过");
         return false;
     }
-    GM_setValue("Config.claimPageAt", Date.now());
-    GM_setValue("Config.claimPageDone", 0);
-    FuckF.log("🟡", "积分领取：网页通道被服务端拒绝，已转后台页面同源领取（无需操作，完成后自动关闭）");
+    const startedAt = Date.now();
+    GM_setValue("Config.claimPageAt", startedAt);
     const tab = GM_openInTab("https://rewards.bing.com/dashboard", { active: false, insert: false, setParent: true });
+    FuckF.log("🟡", "积分领取：网页通道被服务端拒绝，已转后台页面同源领取（无需操作，完成后自动关闭）");
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-    // 等待页面加载 + 分包提取（正常 20-40 秒），拿到结果或超时即关闭
+    // 等待页面脚本回写结果（页面加载 + 领取请求，正常 10-40 秒），拿到结果或超时即关闭标签页
+    let result = null;
     for (let i = 0; i < 18; i++) {
         await sleep(5000);
-        if (GM_getValue("Config.claimPageDone", 0)) break;
+        const r = GM_getValue("Config.claimPageResult", null);
+        if (r && r.at >= startedAt) {
+            result = r;
+            break;
+        }
     }
-    const done = GM_getValue("Config.claimPageDone", 0);
     try { if (tab) tab.close(); } catch (e) {}
-    if (done) FuckF.log("✨", "同源兜底领取已执行");
-    else FuckF.log("🟡", "同源兜底领取未完成（页面未就绪或待领池已清空）");
-    return !!done;
+    if (result && result.ok) FuckF.log("✨", `同源兜底领取成功${result.msg ? `（${result.msg}）` : ""}`);
+    else if (result) FuckF.log("🟡", `同源兜底领取失败（${result.msg || "未知原因"}），下轮再试`);
+    else FuckF.log("🟡", "同源兜底领取未完成：页面脚本未回写结果，请确认《Microsoft Rewards 全任务助手 - 同源领取页》已安装并启用");
+    return !!(result && result.ok);
 };
 
 FuckF.taskClaim = async (pages) => {
