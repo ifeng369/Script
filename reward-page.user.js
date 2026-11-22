@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Microsoft Rewards 全任务助手 - 同源领取页
 // @namespace    https://github.com/ifeng369/Script
-// @version      1.1.0
+// @version      1.2.0
 // @description  配合《Microsoft Rewards 全任务助手》使用：在 rewards 页面内领取待领积分。优先点击页面自带的“领取积分”按钮（使用站点自己的 action 标识，不会因部署更新失效），按钮找不到时退回站点同源 server action 请求。定时脚本跑在扩展后台，Origin 为 chrome-extension://，服务端会直接 500，领取必须由页面上下文完成
 // @author       ifeng369
 // @match        https://rewards.bing.com/dashboard*
@@ -9,6 +9,7 @@
 // @storageName  FuckScripts_Shared_Auth
 // @run-at       document-end
 // @noframes
+// @inject-into  content
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_log
@@ -49,6 +50,8 @@
     const report = (ok, msg) => {
         GM_setValue("Config.claimPageResult", { at: Date.now(), ok: ok, msg: msg || "" });
         GM_log(`✨同源领取：${ok ? "成功" : "失败"}${msg ? ` 🔛${msg}` : ""}`);
+        // 后台脚本打开的临时标签页：结果写回后自行关闭（非脚本打开的标签页浏览器会忽略）
+        setTimeout(() => { try { window.close(); } catch (e) {} }, 2000);
     };
 
     const visible = (el) => !!el && el.offsetParent !== null;
@@ -127,6 +130,7 @@
     };
 
     const run = async () => {
+        GM_log("页面脚本已在 rewards 页面运行");
         // 页面数据可能仍在流式渲染，最多等 15 秒
         let pending = hasPendingClaim();
         for (let i = 0; i < 5 && !pending; i++) {
